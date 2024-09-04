@@ -9,7 +9,6 @@ class UpdateTrinketPage:
         self.page = page
         self.base_url = base_url
         self.trinkets_list_url = f"{base_url}/library/trinkets"
-        self.first_row_text = "#!/bin/python3\n\n"
 
     async def navigate(self, trinket_id: str) -> None:
         try:
@@ -20,8 +19,6 @@ class UpdateTrinketPage:
 
     async def update_trinket(self, trinket_id: str, title: str, new_code: str) -> None:
         try:
-            full_code = self.first_row_text + new_code
-
             iframe = self.page.frame_locator("#embed-code iframe")
             editor = iframe.locator(".ace_editor")
             await editor.wait_for(state="visible", timeout=5000)
@@ -29,9 +26,9 @@ class UpdateTrinketPage:
             textarea = iframe.locator(".ace_text-input")
             await textarea.wait_for(state="visible", timeout=5000)
             await textarea.clear()
-            await textarea.fill(full_code)
+            await textarea.fill(new_code)
 
-            # Update trinket title
+            # Update trinket title if changed
             title_span = self.page.locator('span[editable-text="trinket.name"]')
             await expect(title_span).to_be_visible(timeout=5000)
             current_title = await title_span.inner_text()
@@ -54,8 +51,6 @@ class UpdateTrinketPage:
 
     async def check_update_success(self, trinket_id: str, new_code: str) -> str:
         try:
-            full_code = (self.first_row_text + new_code).replace("\n", "")
-
             await self.navigate(trinket_id)
 
             iframe = self.page.frame_locator("#embed-code iframe")
@@ -66,9 +61,8 @@ class UpdateTrinketPage:
             await textarea.wait_for(state="visible", timeout=5000)
 
             updated_code = await textarea.inner_text()
-            updated_code = updated_code.replace("\n", "")
 
-            if updated_code != full_code:
+            if updated_code.replace("\n", "") != new_code.replace("\n", ""):
                 raise TrinketVerificationError(f"Failed to verify trinket {trinket_id} code update! Codes do not match")
 
             logger.info(f"Trinket {trinket_id} update verified")

@@ -12,7 +12,6 @@ class CreateTrinketPage:
         self.page = page
         self.base_url = base_url
         self.trinkets_list_url = f"{base_url}/library/trinkets"
-        self.first_row_text = "#!/bin/python3\n\n"
 
     def get_trinket_id(self):
         current_url = self.page.url
@@ -22,7 +21,7 @@ class CreateTrinketPage:
 
     async def navigate(self):
         try:
-            await self.page.goto(f"{self.trinkets_list_url}/create?lang=python")
+            await self.page.goto(f"{self.trinkets_list_url}/create?lang=python3")
             await self.page.wait_for_selector("#embed-code iframe", state="visible", timeout=15000)
             logger.info("Trinket editor successfully loaded")
         except Exception as e:
@@ -30,8 +29,6 @@ class CreateTrinketPage:
 
     async def create_trinket(self, title: str, code: str) -> str:
         try:
-            full_code = self.first_row_text + code
-
             # Wait for trinket editor
             iframe = self.page.frame_locator("#embed-code iframe")
             editor = iframe.locator(".ace_editor")
@@ -39,7 +36,7 @@ class CreateTrinketPage:
 
             textarea = iframe.locator(".ace_text-input")
             await textarea.wait_for(state="visible", timeout=5000)
-            await textarea.fill(full_code)
+            await textarea.fill(code)
 
             # Create trinket title
             title_span = self.page.locator('span[editable-text="trinket.name"]')
