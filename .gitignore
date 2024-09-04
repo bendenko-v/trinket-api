@@ -42,3 +42,4 @@ node_modules/
 *.log
 *.sqlite3
 *.tmp
+*run_test*.py
