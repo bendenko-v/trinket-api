@@ -21,7 +21,7 @@ async def create_trinket(data: Trinket):
             return handle_exception(e)
 
 
-@router.patch("/trinkets/{trinket_id}")
+@router.put("/trinkets/{trinket_id}")
 async def update_trinket(trinket_id: str, data: Trinket):
     async with TrinketClient() as client:
         try:
